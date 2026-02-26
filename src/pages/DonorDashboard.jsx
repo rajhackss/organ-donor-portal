@@ -121,6 +121,8 @@ export default function DonorDashboard() {
                             <span className="text-xl font-bold text-rose-600">Donor Portal</span>
                         </div>
                         <div className="flex items-center space-x-4">
+                            <Link to="/" className="text-gray-500 hover:text-rose-600 font-medium hidden sm:block">Home</Link>
+                            <Link to="/education" className="text-gray-500 hover:text-rose-600 font-medium hidden sm:block">Education</Link>
                             <NotificationDropdown />
                             <span className="text-gray-700">{currentUser?.email}</span>
                             <button onClick={logout} className="text-gray-500 hover:text-gray-700">Logout</button>

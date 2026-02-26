@@ -3,6 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { doc, getDoc, setDoc, updateDoc, collection, query, where, onSnapshot } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { Activity, User, Heart, MessageCircle } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import ChatWindow from '../components/ChatWindow';
 import NotificationDropdown from '../components/NotificationDropdown';
 
@@ -122,6 +123,8 @@ export default function RecipientDashboard() {
                             <span className="text-xl font-bold text-rose-600">Recipient Portal</span>
                         </div>
                         <div className="flex items-center space-x-4">
+                            <Link to="/" className="text-gray-500 hover:text-rose-600 font-medium hidden sm:block">Home</Link>
+                            <Link to="/education" className="text-gray-500 hover:text-rose-600 font-medium hidden sm:block">Education</Link>
                             <NotificationDropdown />
                             <span className="text-gray-700">{currentUser?.email}</span>
                             <button onClick={logout} className="text-gray-500 hover:text-gray-700">Logout</button>

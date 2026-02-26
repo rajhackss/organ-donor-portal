@@ -3,6 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { collection, query, where, doc, updateDoc, onSnapshot } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { ShieldAlert, CheckCircle, XCircle, MessageCircle } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import ChatWindow from '../components/ChatWindow';
 import NotificationDropdown from '../components/NotificationDropdown';
 import { sendNotification } from '../lib/notifications';
@@ -82,6 +83,8 @@ export default function AdminDashboard() {
                             <span className="text-xl font-bold text-white">Admin Portal</span>
                         </div>
                         <div className="flex items-center space-x-4">
+                            <Link to="/" className="text-gray-300 hover:text-white font-medium hidden sm:block">Home</Link>
+                            <Link to="/education" className="text-gray-300 hover:text-white font-medium hidden sm:block">Education</Link>
                             <NotificationDropdown />
                             <span className="text-gray-300">{currentUser?.email}</span>
                             <button onClick={logout} className="text-gray-300 hover:text-white">Logout</button>
