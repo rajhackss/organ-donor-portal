@@ -1,16 +1,71 @@
-# React + Vite
+# Donor Bridge (Organ Donor Portal)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Donor Bridge is a centralized platform connecting organ donors with recipients in need. It streamlines the transplantation process, ensures transparency, and helps save lives by integrating donors, recipients, and administrators in a single unified system.
 
-Currently, two official plugins are available:
+## 🚀 Key Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Role-Based Dashboards**: Dedicated interfaces for Donors, Recipients, and System Administrators.
+- **Unified Authentication**: Secure Google Sign-In with an intuitive post-login role selection onboarding flow.
+- **Real-Time Data**: Built on Firebase Firestore for instant updates on statuses, matches, and notifications.
+- **Direct Messaging System**: Integrated chat allowing verified Donors and Recipients to communicate securely.
+- **AI Support Chatbot**: Integrated AI assistant to help users navigate the platform and answer common questions.
+- **Notification Alerts**: In-app notifications to keep users updated on verification statuses and important alerts.
+- **Admin Verification Workflow**: Secure admin portal to review user details, approve/reject verifications, and monitor system statistics.
 
-## React Compiler
+## 🛠️ Technology Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Frontend Framework**: React 19 + Vite
+- **Routing**: React Router DOM (v7)
+- **Styling**: Tailwind CSS (v4)
+- **Icons**: Lucide React
+- **Backend & Database**: Firebase (Auth & Firestore)
+- **Language**: JavaScript (ES6+)
 
-## Expanding the ESLint configuration
+## 📦 Getting Started
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### Prerequisites
+
+Ensure you have the following installed on your local machine:
+
+- [Node.js](https://nodejs.org/) (v18 or higher recommended)
+- npm or yarn
+
+### Installation
+
+1.  **Clone the repository/Navigate to directory:**
+
+    ```bash
+    cd organ-donor-portal
+    ```
+
+2.  **Install dependencies:**
+
+    ```bash
+    npm install
+    ```
+
+3.  **Firebase Configuration:**
+    Ensure your `src/lib/firebase.js` file is correctly configured with your Firebase project credentials. You need Authentication (Google Provider) and Firestore enabled in your Firebase Console.
+
+4.  **Start the Development Server:**
+
+    ```bash
+    npm run dev
+    ```
+
+5.  Open your browser and navigate to `http://localhost:5173`.
+
+## 🔒 Roles and Access
+
+- **Donor**: Can create a medical profile, list their organ availability, and browse verified recipients. Must be verified by an admin to communicate with recipients.
+- **Recipient**: Can submit organ requests, update medical details, and browse verified donors. Must be verified by an admin to communicate with donors.
+- **Admin**: System administrators who verify user accounts and manage the platform.
+  - _Note: Admin access must be securely assigned manually in the Firestore database by changing the user's `role` field to `admin`._
+
+## 🤝 Contributing
+
+Contributions, issues, and feature requests are welcome!
+
+## 📄 License
+
+This project is licensed under the MIT License.
