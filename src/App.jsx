@@ -7,6 +7,7 @@ import Login from './pages/Login';
 import DonorDashboard from './pages/DonorDashboard';
 import RecipientDashboard from './pages/RecipientDashboard';
 import AdminDashboard from './pages/AdminDashboard';
+import EducationalContent from './pages/EducationalContent';
 
 // Private Route Component
 const PrivateRoute = ({ children, allowedRoles }) => {
@@ -24,6 +25,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/education" element={<EducationalContent />} />
 
         {/* Protected Routes */}
         <Route path="/donor" element={

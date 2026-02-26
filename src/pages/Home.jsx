@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Heart, Users, Activity, PlayCircle } from 'lucide-react';
+import { Heart, Users, Activity, BookOpen } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
 export default function Home() {
@@ -16,6 +16,9 @@ export default function Home() {
                             <span className="ml-2 text-2xl font-bold text-gray-900">Donor Bridge</span>
                         </div>
                         <div className="flex items-center space-x-4">
+                            <Link to="/education" className="text-gray-500 hover:text-rose-600 font-medium mr-4">
+                                Education
+                            </Link>
                             {currentUser ? (
                                 <>
                                     <span className="text-gray-700">Hi, {currentUser.displayName}</span>
@@ -85,11 +88,11 @@ export default function Home() {
                                 <p className="mt-2 text-gray-500">Receive alerts on medical status and compatibility matches immediately.</p>
                             </div>
 
-                            <div className="text-center p-6 border border-gray-100 rounded-lg shadow-sm hover:shadow-md transition">
-                                <PlayCircle className="h-12 w-12 text-teal-500 mx-auto" />
-                                <h3 className="mt-4 text-xl font-medium text-gray-900">Awareness & Education</h3>
-                                <p className="mt-2 text-gray-500">Learn about organ donation through our educational video resources.</p>
-                            </div>
+                            <Link to="/education" className="text-center p-6 border border-gray-100 rounded-lg shadow-sm hover:shadow-md transition block group">
+                                <BookOpen className="h-12 w-12 text-teal-500 mx-auto group-hover:text-teal-600" />
+                                <h3 className="mt-4 text-xl font-medium text-gray-900 group-hover:text-teal-600">Awareness & Education</h3>
+                                <p className="mt-2 text-gray-500">Read our articles and infographics to understand the impact of organ donation.</p>
+                            </Link>
                         </div>
                     </div>
                 </div>
