@@ -15,7 +15,7 @@ export function AuthProvider({ children }) {
     const [loading, setLoading] = useState(true);
 
     // Sign in with Google
-    const loginWithGoogle = async (role = 'donor') => {
+    const loginWithGoogle = async () => {
         try {
             const result = await signInWithPopup(auth, googleProvider);
             const user = result.user;
@@ -24,19 +24,19 @@ export function AuthProvider({ children }) {
             const userDocRef = doc(db, 'users', user.uid);
             const userDoc = await getDoc(userDocRef);
 
-            let finalRole = role;
+            let finalRole = null;
             if (!userDoc.exists()) {
-                // First time login, create document
+                // First time login, create document without a specific role yet
                 await setDoc(userDocRef, {
                     uid: user.uid,
                     email: user.email,
                     displayName: user.displayName,
                     photoURL: user.photoURL,
-                    role: role, // Default requested role
+                    role: null, // Role to be selected post-login
                     status: 'Pending', // Pending admin verification
                     createdAt: new Date()
                 });
-                setUserRole(role);
+                setUserRole(null);
             } else {
                 finalRole = userDoc.data().role;
                 setUserRole(finalRole);
@@ -45,6 +45,20 @@ export function AuthProvider({ children }) {
             return { user, role: finalRole };
         } catch (error) {
             console.error("Error signing in with Google", error);
+            throw error;
+        }
+    };
+
+    const updateUserRole = async (newRole) => {
+        if (!currentUser) return;
+        try {
+            const userDocRef = doc(db, 'users', currentUser.uid);
+            // using setDoc with merge:true is safer if the document might not exist (though it should by now)
+            await setDoc(userDocRef, { role: newRole }, { merge: true });
+            setUserRole(newRole);
+            return newRole;
+        } catch (error) {
+            console.error("Error updating user role", error);
             throw error;
         }
     };
@@ -76,7 +90,8 @@ export function AuthProvider({ children }) {
         currentUser,
         userRole,
         loginWithGoogle,
-        logout
+        logout,
+        updateUserRole
     };
 
     return (
