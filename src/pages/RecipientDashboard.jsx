@@ -2,7 +2,9 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { doc, getDoc, setDoc, updateDoc, collection, query, where, onSnapshot } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import { Activity, User, Heart } from 'lucide-react';
+import { Activity, User, Heart, MessageCircle } from 'lucide-react';
+import ChatWindow from '../components/ChatWindow';
+import NotificationDropdown from '../components/NotificationDropdown';
 
 export default function RecipientDashboard() {
     const { currentUser, logout } = useAuth();
@@ -21,6 +23,7 @@ export default function RecipientDashboard() {
     const [urgencyLevel, setUrgencyLevel] = useState('Low');
 
     const [availableDonors, setAvailableDonors] = useState([]);
+    const [activeChatUser, setActiveChatUser] = useState(null);
 
     useEffect(() => {
         async function fetchProfile() {
@@ -119,6 +122,7 @@ export default function RecipientDashboard() {
                             <span className="text-xl font-bold text-rose-600">Recipient Portal</span>
                         </div>
                         <div className="flex items-center space-x-4">
+                            <NotificationDropdown />
                             <span className="text-gray-700">{currentUser?.email}</span>
                             <button onClick={logout} className="text-gray-500 hover:text-gray-700">Logout</button>
                         </div>
@@ -309,12 +313,13 @@ export default function RecipientDashboard() {
                                                             </div>
                                                         </div>
                                                         <div className="mt-4 pt-4 border-t border-gray-200">
-                                                            <a
-                                                                href={`mailto:${donor.email}`}
+                                                            <button
+                                                                onClick={() => setActiveChatUser(donor)}
                                                                 className="w-full flex justify-center items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none"
                                                             >
-                                                                Contact Donor
-                                                            </a>
+                                                                <MessageCircle className="h-4 w-4 mr-2 text-gray-500" />
+                                                                Message Donor
+                                                            </button>
                                                         </div>
                                                     </div>
                                                 );
@@ -365,6 +370,15 @@ export default function RecipientDashboard() {
 
                 </div>
             </div>
+
+            {/* Chat Window Overlay */}
+            {activeChatUser && (
+                <ChatWindow
+                    recipientId={activeChatUser.uid || activeChatUser.id}
+                    recipientName={activeChatUser.fullName || activeChatUser.displayName || 'User'}
+                    onClose={() => setActiveChatUser(null)}
+                />
+            )}
         </div>
     );
 }

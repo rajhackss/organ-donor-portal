@@ -2,7 +2,10 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { collection, query, where, doc, updateDoc, onSnapshot } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import { ShieldAlert, CheckCircle, XCircle } from 'lucide-react';
+import { ShieldAlert, CheckCircle, XCircle, MessageCircle } from 'lucide-react';
+import ChatWindow from '../components/ChatWindow';
+import NotificationDropdown from '../components/NotificationDropdown';
+import { sendNotification } from '../lib/notifications';
 
 export default function AdminDashboard() {
     const { currentUser, logout } = useAuth();
@@ -15,6 +18,7 @@ export default function AdminDashboard() {
     });
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('pending'); // 'pending' | 'verified'
+    const [activeChatUser, setActiveChatUser] = useState(null);
 
     useEffect(() => {
         const usersRef = collection(db, 'users');
@@ -47,6 +51,15 @@ export default function AdminDashboard() {
             const userRef = doc(db, 'users', uid);
             await updateDoc(userRef, { status });
 
+            // Send Notification
+            const title = status === 'Verified' ? 'Verification Successful' : 'Verification Rejected';
+            const message = status === 'Verified'
+                ? 'Your account has been successfully verified by an administrator. You now have full access to the portal.'
+                : 'Your account verification has been rejected. Please update your profile or contact support for more information.';
+            const type = status === 'Verified' ? 'success' : 'warning';
+
+            await sendNotification(uid, title, message, type);
+
             alert(`User marked as ${status}`);
         } catch (error) {
             console.error("Error updating verification status:", error);
@@ -69,6 +82,7 @@ export default function AdminDashboard() {
                             <span className="text-xl font-bold text-white">Admin Portal</span>
                         </div>
                         <div className="flex items-center space-x-4">
+                            <NotificationDropdown />
                             <span className="text-gray-300">{currentUser?.email}</span>
                             <button onClick={logout} className="text-gray-300 hover:text-white">Logout</button>
                         </div>
@@ -213,9 +227,13 @@ export default function AdminDashboard() {
                                                         </p>
                                                     </div>
                                                     <div>
-                                                        <a href={`mailto:${user.email}`} className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none">
-                                                            Contact User
-                                                        </a>
+                                                        <button
+                                                            onClick={() => setActiveChatUser(user)}
+                                                            className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none"
+                                                        >
+                                                            <MessageCircle className="h-4 w-4 mr-2 text-gray-500" />
+                                                            Message User
+                                                        </button>
                                                     </div>
                                                 </div>
                                                 <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -253,6 +271,15 @@ export default function AdminDashboard() {
                     )}
                 </div>
             </div>
+
+            {/* Chat Window Overlay */}
+            {activeChatUser && (
+                <ChatWindow
+                    recipientId={activeChatUser.uid}
+                    recipientName={activeChatUser.fullName || activeChatUser.displayName || 'User'}
+                    onClose={() => setActiveChatUser(null)}
+                />
+            )}
         </div>
     );
 }

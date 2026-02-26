@@ -8,6 +8,7 @@ import DonorDashboard from './pages/DonorDashboard';
 import RecipientDashboard from './pages/RecipientDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import EducationalContent from './pages/EducationalContent';
+import Chatbot from './components/Chatbot';
 
 // Private Route Component
 const PrivateRoute = ({ children, allowedRoles }) => {
@@ -46,6 +47,7 @@ function App() {
           </PrivateRoute>
         } />
       </Routes>
+      <Chatbot />
     </div>
   );
 }

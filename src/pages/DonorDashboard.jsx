@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc, collection, query, where, onSnapshot } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { Link } from 'react-router-dom';
-import { Heart, Activity, User } from 'lucide-react';
+import { Heart, Activity, Users, MessageCircle } from 'lucide-react';
+import ChatWindow from '../components/ChatWindow';
+import NotificationDropdown from '../components/NotificationDropdown';
 
 export default function DonorDashboard() {
     const { currentUser, logout } = useAuth();
@@ -20,6 +22,9 @@ export default function DonorDashboard() {
     const [bloodGroup, setBloodGroup] = useState('');
     const [organAvailable, setOrganAvailable] = useState('');
     const [availabilityStatus, setAvailabilityStatus] = useState(false);
+
+    const [availableRecipients, setAvailableRecipients] = useState([]);
+    const [activeChatUser, setActiveChatUser] = useState(null);
 
     useEffect(() => {
         async function fetchProfile() {
@@ -43,6 +48,32 @@ export default function DonorDashboard() {
             }
         }
         fetchProfile();
+    }, [currentUser]);
+
+    // Fetch Available Recipients
+    useEffect(() => {
+        if (!currentUser) return;
+
+        const recipientsRef = collection(db, 'users');
+        const q = query(
+            recipientsRef,
+            where('role', '==', 'recipient')
+        );
+
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+            const recipients = [];
+            snapshot.forEach((doc) => {
+                const data = doc.data();
+                if (data.status === 'Verified') {
+                    recipients.push({ id: doc.id, ...data });
+                }
+            });
+            setAvailableRecipients(recipients);
+        }, (error) => {
+            console.error("Error fetching available recipients:", error);
+        });
+
+        return () => unsubscribe();
     }, [currentUser]);
 
     const handleUpdateProfile = async (e) => {
@@ -90,6 +121,7 @@ export default function DonorDashboard() {
                             <span className="text-xl font-bold text-rose-600">Donor Portal</span>
                         </div>
                         <div className="flex items-center space-x-4">
+                            <NotificationDropdown />
                             <span className="text-gray-700">{currentUser?.email}</span>
                             <button onClick={logout} className="text-gray-500 hover:text-gray-700">Logout</button>
                         </div>
@@ -243,6 +275,71 @@ export default function DonorDashboard() {
 
                             </div>
                         </div>
+
+                        {/* Available Recipients List */}
+                        {profile?.status === 'Verified' ? (
+                            <div className="bg-white shadow overflow-hidden sm:rounded-lg mt-8">
+                                <div className="px-4 py-5 sm:p-6">
+                                    <h3 className="text-lg leading-6 font-medium text-gray-900 flex items-center mb-4">
+                                        <Users className="mr-2 h-5 w-5 text-rose-500" />
+                                        Verified Recipients Needing Organs
+                                    </h3>
+                                    {availableRecipients.length === 0 ? (
+                                        <p className="text-sm text-gray-500">Currently, there are no verified recipients in the system.</p>
+                                    ) : (
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            {availableRecipients.map((recipient) => {
+                                                const matchesOrgan = organAvailable && recipient.organRequired === organAvailable;
+                                                const matchesBlood = bloodGroup && recipient.bloodGroup === bloodGroup;
+
+                                                return (
+                                                    <div key={recipient.id} className={`border rounded-lg p-4 ${matchesOrgan ? 'border-green-300 bg-green-50' : 'border-gray-200 bg-white'}`}>
+                                                        <div className="flex justify-between items-start">
+                                                            <div>
+                                                                <h4 className="text-md font-bold text-gray-900 flex items-center">
+                                                                    {recipient.fullName || 'Anonymous Recipient'}
+                                                                    {matchesOrgan && (
+                                                                        <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                                                                            Organ Match
+                                                                        </span>
+                                                                    )}
+                                                                </h4>
+                                                                <p className="text-sm text-gray-500 mt-1">Age: {recipient.age || 'N/A'}</p>
+                                                            </div>
+                                                            <div className="text-right">
+                                                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${matchesBlood ? 'bg-rose-100 text-rose-800' : 'bg-gray-100 text-gray-800'}`}>
+                                                                    Blood: {recipient.bloodGroup || 'Unknown'}
+                                                                </span>
+                                                                <p className="text-sm font-medium text-gray-900 mt-1">Needs: {recipient.organRequired || 'Unknown'}</p>
+                                                            </div>
+                                                        </div>
+                                                        <div className="mt-4 pt-4 border-t border-gray-200">
+                                                            <button
+                                                                onClick={() => setActiveChatUser(recipient)}
+                                                                className="w-full flex justify-center items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none"
+                                                            >
+                                                                <MessageCircle className="h-4 w-4 mr-2 text-gray-500" />
+                                                                Message Recipient
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mt-8">
+                                <div className="flex">
+                                    <div className="ml-3">
+                                        <p className="text-sm text-yellow-700">
+                                            Your account must be <b>Verified</b> by an administrator before you can view and contact recipients in need. Current Status: {profile?.status || 'Pending'}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                     </div>
 
                     {/* Side Panel */}
@@ -273,6 +370,15 @@ export default function DonorDashboard() {
 
                 </div>
             </div>
+
+            {/* Chat Window Overlay */}
+            {activeChatUser && (
+                <ChatWindow
+                    recipientId={activeChatUser.uid || activeChatUser.id}
+                    recipientName={activeChatUser.fullName || activeChatUser.displayName || 'User'}
+                    onClose={() => setActiveChatUser(null)}
+                />
+            )}
         </div >
     );
 }
