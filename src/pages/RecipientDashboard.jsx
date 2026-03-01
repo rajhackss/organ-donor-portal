@@ -4,8 +4,9 @@ import { doc, getDoc, setDoc, updateDoc, collection, query, where, onSnapshot } 
 import { db } from '../lib/firebase';
 import { Activity, User, Heart, MessageCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import Navbar from '../components/Navbar';
+import Loader from '../components/Loader';
 import ChatWindow from '../components/ChatWindow';
-import NotificationDropdown from '../components/NotificationDropdown';
 
 export default function RecipientDashboard() {
     const { currentUser, logout } = useAuth();
@@ -112,26 +113,11 @@ export default function RecipientDashboard() {
         }
     };
 
-    if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+    if (loading) return <Loader message="Loading profile..." />;
 
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col">
-            <nav className="bg-white shadow">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between h-16">
-                        <div className="flex items-center">
-                            <span className="text-xl font-bold text-rose-600">Recipient Portal</span>
-                        </div>
-                        <div className="flex items-center space-x-4">
-                            <Link to="/" className="text-gray-500 hover:text-rose-600 font-medium hidden sm:block">Home</Link>
-                            <Link to="/education" className="text-gray-500 hover:text-rose-600 font-medium hidden sm:block">Education</Link>
-                            <NotificationDropdown />
-                            <span className="text-gray-700">{currentUser?.email}</span>
-                            <button onClick={logout} className="text-gray-500 hover:text-gray-700">Logout</button>
-                        </div>
-                    </div>
-                </div>
-            </nav>
+            <Navbar />
 
             <div className="flex-grow max-w-7xl w-full mx-auto py-10 px-4 sm:px-6 lg:px-8">
                 <h1 className="text-3xl font-bold text-gray-900">Welcome, {currentUser?.displayName}</h1>
@@ -161,6 +147,7 @@ export default function RecipientDashboard() {
                                                 id="fullName"
                                                 value={fullName}
                                                 onChange={(e) => setFullName(e.target.value)}
+                                                required
                                                 className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-rose-500 focus:border-rose-500 sm:text-sm"
                                             />
                                         </div>
@@ -172,6 +159,9 @@ export default function RecipientDashboard() {
                                                 id="age"
                                                 value={age}
                                                 onChange={(e) => setAge(e.target.value)}
+                                                required
+                                                min="0"
+                                                max="120"
                                                 className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-rose-500 focus:border-rose-500 sm:text-sm"
                                             />
                                         </div>
@@ -183,6 +173,9 @@ export default function RecipientDashboard() {
                                                 id="contactPhone"
                                                 value={contactPhone}
                                                 onChange={(e) => setContactPhone(e.target.value)}
+                                                required
+                                                pattern="[0-9]{10,15}"
+                                                title="Please enter a valid phone number (10-15 digits)"
                                                 className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-rose-500 focus:border-rose-500 sm:text-sm"
                                             />
                                         </div>
@@ -201,6 +194,7 @@ export default function RecipientDashboard() {
                                                 id="bloodGroup"
                                                 value={bloodGroup}
                                                 onChange={(e) => setBloodGroup(e.target.value)}
+                                                required
                                                 className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-rose-500 focus:border-rose-500 sm:text-sm rounded-md"
                                             >
                                                 <option value="">Select...</option>
@@ -223,6 +217,7 @@ export default function RecipientDashboard() {
                                                 id="organRequired"
                                                 value={organRequired}
                                                 onChange={(e) => setOrganRequired(e.target.value)}
+                                                required
                                                 className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-rose-500 focus:border-rose-500 sm:text-sm rounded-md"
                                             >
                                                 <option value="">Select...</option>

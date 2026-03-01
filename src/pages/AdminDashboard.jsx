@@ -4,8 +4,9 @@ import { collection, query, where, doc, updateDoc, onSnapshot } from 'firebase/f
 import { db } from '../lib/firebase';
 import { ShieldAlert, CheckCircle, XCircle, MessageCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import Navbar from '../components/Navbar';
+import Loader from '../components/Loader';
 import ChatWindow from '../components/ChatWindow';
-import NotificationDropdown from '../components/NotificationDropdown';
 import { sendNotification } from '../lib/notifications';
 
 export default function AdminDashboard() {
@@ -20,6 +21,7 @@ export default function AdminDashboard() {
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('pending'); // 'pending' | 'verified'
     const [activeChatUser, setActiveChatUser] = useState(null);
+    const [searchTerm, setSearchTerm] = useState('');
 
     useEffect(() => {
         const usersRef = collection(db, 'users');
@@ -68,34 +70,49 @@ export default function AdminDashboard() {
         }
     };
 
+    // Filter by pending/verified
     const pendingUsers = users.filter(u => u.status === 'Pending' && u.role !== 'admin');
     const verifiedUsers = users.filter(u => u.status === 'Verified' && u.role !== 'admin');
 
-    if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+    // Further filter by search term
+    const filterUsers = (userList) => {
+        if (!searchTerm) return userList;
+        const lowerTerm = searchTerm.toLowerCase();
+        return userList.filter(u =>
+            (u.fullName || '').toLowerCase().includes(lowerTerm) ||
+            (u.displayName || '').toLowerCase().includes(lowerTerm) ||
+            (u.email || '').toLowerCase().includes(lowerTerm) ||
+            (u.role || '').toLowerCase().includes(lowerTerm)
+        );
+    };
+
+    const displayPendingUsers = filterUsers(pendingUsers);
+    const displayVerifiedUsers = filterUsers(verifiedUsers);
+
+    if (loading) return <Loader message="Loading dashboard data..." />;
 
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col">
-            <nav className="bg-gray-800 shadow">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between h-16">
-                        <div className="flex items-center">
-                            <ShieldAlert className="text-rose-500 w-6 h-6 mr-2" />
-                            <span className="text-xl font-bold text-white">Admin Portal</span>
-                        </div>
-                        <div className="flex items-center space-x-4">
-                            <Link to="/" className="text-gray-300 hover:text-white font-medium hidden sm:block">Home</Link>
-                            <Link to="/education" className="text-gray-300 hover:text-white font-medium hidden sm:block">Education</Link>
-                            <NotificationDropdown />
-                            <span className="text-gray-300">{currentUser?.email}</span>
-                            <button onClick={logout} className="text-gray-300 hover:text-white">Logout</button>
+            <Navbar />
+
+            <div className="flex-grow max-w-7xl mx-auto py-10 px-4 sm:px-6 lg:px-8 w-full">
+                <div className="sm:flex sm:items-center sm:justify-between">
+                    <div>
+                        <h1 className="text-3xl font-bold text-gray-900">System Dashboard</h1>
+                        <p className="mt-2 text-gray-600">Manage user verifications and platform settings.</p>
+                    </div>
+                    <div className="mt-4 sm:mt-0">
+                        <div className="relative rounded-md shadow-sm max-w-xs">
+                            <input
+                                type="text"
+                                className="focus:ring-rose-500 focus:border-rose-500 block w-full sm:text-sm border-gray-300 rounded-md py-2 px-3"
+                                placeholder="Search users by name, email or role..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
                         </div>
                     </div>
                 </div>
-            </nav>
-
-            <div className="flex-grow max-w-7xl mx-auto py-10 px-4 sm:px-6 lg:px-8 w-full">
-                <h1 className="text-3xl font-bold text-gray-900">System Dashboard</h1>
-                <p className="mt-2 text-gray-600">Manage user verifications and platform settings.</p>
 
                 <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
                     <div className="bg-white overflow-hidden shadow rounded-lg border-l-4 border-yellow-500">
@@ -146,14 +163,14 @@ export default function AdminDashboard() {
                     {activeTab === 'pending' ? (
                         <>
                             <h2 className="text-lg leading-6 font-medium text-gray-900 mb-4">Pending Review Queue</h2>
-                            {pendingUsers.length === 0 ? (
+                            {displayPendingUsers.length === 0 ? (
                                 <div className="bg-white shadow overflow-hidden sm:rounded-md p-6 text-center text-gray-500">
-                                    No pending verifications at this time.
+                                    {searchTerm ? 'No pending verifications found matching your search.' : 'No pending verifications at this time.'}
                                 </div>
                             ) : (
                                 <div className="bg-white shadow overflow-hidden sm:rounded-md">
                                     <ul className="divide-y divide-gray-200">
-                                        {pendingUsers.map((user) => (
+                                        {displayPendingUsers.map((user) => (
                                             <li key={user.uid} className="px-4 py-4 sm:px-6">
                                                 <div className="flex items-center justify-between">
                                                     <div className="flex flex-col">
@@ -206,14 +223,14 @@ export default function AdminDashboard() {
                     ) : (
                         <>
                             <h2 className="text-lg leading-6 font-medium text-gray-900 mb-4">Verified Users Directory</h2>
-                            {verifiedUsers.length === 0 ? (
+                            {displayVerifiedUsers.length === 0 ? (
                                 <div className="bg-white shadow overflow-hidden sm:rounded-md p-6 text-center text-gray-500">
-                                    No verified users found.
+                                    {searchTerm ? 'No verified users found matching your search.' : 'No verified users found.'}
                                 </div>
                             ) : (
                                 <div className="bg-white shadow overflow-hidden sm:rounded-md">
                                     <ul className="divide-y divide-gray-200">
-                                        {verifiedUsers.map((user) => (
+                                        {displayVerifiedUsers.map((user) => (
                                             <li key={user.uid} className="px-4 py-6 sm:px-6 hover:bg-gray-50">
                                                 <div className="flex items-center justify-between">
                                                     <div className="flex flex-col">

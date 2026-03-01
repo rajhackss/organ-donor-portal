@@ -1,52 +1,22 @@
 import { Link } from 'react-router-dom';
-import { Heart, Users, Activity, BookOpen } from 'lucide-react';
+import { Users, Activity, BookOpen } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import Navbar from '../components/Navbar';
 
 export default function Home() {
-    const { currentUser, userRole, logout } = useAuth();
+    // Current user and role are now handled internally by Navbar for navigation
+    // but we still need currentUser to show/hide the "Register Now" hero button.
+    // If you need it, import useAuth again, otherwise we can assume the button
+    // is just always showing, or we keep useAuth just for currentUser.
+
+    // Actually, looking at the code, we need currentUser for line 61
+    // let's re-add useAuth
+    const { currentUser } = useAuth();
 
     return (
         <div className="min-h-screen flex flex-col">
             {/* Navigation */}
-            <nav className="bg-white shadow">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between h-16">
-                        <div className="flex items-center">
-                            <Heart className="h-8 w-8 text-rose-600" />
-                            <span className="ml-2 text-2xl font-bold text-gray-900">Donor Bridge</span>
-                        </div>
-                        <div className="flex items-center space-x-4">
-                            <Link to="/education" className="text-gray-500 hover:text-rose-600 font-medium mr-4">
-                                Education
-                            </Link>
-                            {currentUser ? (
-                                <>
-                                    <span className="text-gray-700">Hi, {currentUser.displayName}</span>
-                                    <Link
-                                        to={userRole === 'admin' ? '/admin' : `/${userRole}`}
-                                        className="text-rose-600 hover:text-rose-900 font-medium"
-                                    >
-                                        Dashboard
-                                    </Link>
-                                    <button
-                                        onClick={logout}
-                                        className="ml-4 text-gray-500 hover:text-gray-700"
-                                    >
-                                        Log out
-                                    </button>
-                                </>
-                            ) : (
-                                <Link
-                                    to="/login"
-                                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-rose-600 hover:bg-rose-700"
-                                >
-                                    Sign in / Register
-                                </Link>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            </nav>
+            <Navbar />
 
             {/* Hero Section */}
             <div className="flex-grow bg-rose-50/30">
